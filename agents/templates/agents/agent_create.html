@@ -1,9 +1,9 @@
 {% extends "base.html" %}
     {% block content %}
-        <a href="{% url 'leads:lead-list' %}">Go back to leads</a>
+        <a href="{% url 'agents:agent-list' %}">Go back to agents</a>
         <hr/>
         <h1 class="text-lg font-medium leading-6 text-gray-900">Create a new lead</h1>
-        <div class="mt-5 md:mt-0 md:col-span-2">
+        <div class="mt-5 md:mt-0 md:col-span-2"></div>
             <form method="post">
                 <div class="shadow overflow-hidden sm:rounded-md">
                     <div class="px-4 py-5 bg-white sm:p-6">
@@ -11,14 +11,13 @@
                             <div class="col-span-6 sm:col-span-3">
                                 {% csrf_token %}
                                 {{ form.as_p }}
-                                <br/>
-                                <button class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" type="submit">
-                                    Submit
-                                </button>
+                                <br />
+                                <button class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" type="submit">Submit</button>
                             </div>
                         </div>
-                    </div>
                 </div>
             </form>
         </div>
     {% endblock content %}    
+
+   
