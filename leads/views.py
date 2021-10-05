@@ -27,14 +27,12 @@ class LeadListView( LoginRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         user = self.request.user
-
         # initial queryset of leads for the entire organization
         if user.is_organizer:
             queryset = Lead.objects.filter(organization=user.userprofile, agent__isnull=False)
         else:
             queryset = Lead.objects.filter(organization=user.agent.organization, agent__isnull=False)
             # filter for the agent that is logged in
-
             queryset = queryset.filter(agent__user=user)
         return queryset
 
@@ -44,9 +42,11 @@ class LeadListView( LoginRequiredMixin, generic.ListView):
         if user.is_organizer:
             queryset = Lead.objects.filter(organization=user.userprofile, agent__isnull=True)
             context.update({
-                "unassigned leads": queryset
+                "unassigned_leads": queryset
             })
-        return context 
+        return context
+
+    
 
 #def lead_list(request):
     #leads = Lead.objects.all()
@@ -148,7 +148,7 @@ class LeadDeleteView(LoginRequiredMixin, generic.DeleteView):
 
 class AssignAgentView(OrganizerAndLoginRequiredMixin, generic.FormView):
     template_name = "leads/assign_agent.html"
-    form_class = AssignAgentForm
+    form_class =  AssignAgentForm
 
     def get_form_kwargs(self, **kwargs):
         kwargs = super(AssignAgentView, self).get_form_kwargs(**kwargs)
@@ -157,12 +157,15 @@ class AssignAgentView(OrganizerAndLoginRequiredMixin, generic.FormView):
         })
         return kwargs
 
-    def form_valid(self, form):
-        print(form.cleaned_data["agent"])
-        return super(AssignAgentForm, self).form_valid(form)
-
     def get_success_url(self):
         return reverse("leads:lead-list")
+
+    def form_valid(self, form):
+        agent = form.cleaned_data["agent"]
+        lead = Lead.objects.get(id=self.kwargs["pk"])
+        lead.agent = agent
+        lead.save()
+        return super(AssignAgentView, self).form_valid(form)
 
 
 #def lead_delete(request, pk):
