@@ -39,6 +39,15 @@
                         <span class="ml-auto text-gray-900">{{ lead.phone_numbers }}</span>
                     </div>
                 </div>
+                <a href="#" class="text-white bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded-md">Add a followup</a>
+            </div>
+            <div>
+                {% for followup in lead.followups.all %}
+                    {{ followup.notes }}
+                    {% if followup.file %}
+                        <img src="{{ followup.file.url }}" />
+                    {% endif %}
+                {% endfor %}
             </div>
         </div>
     </section>

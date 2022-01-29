@@ -12,7 +12,8 @@ from .forms import (
                         LeadModelForm, 
                         CustomUserCreationForm, 
                         AssignAgentForm,  
-                        LeadCategoryUpdateForm
+                        LeadCategoryUpdateForm,
+                        CategoryModelForm
                     )
 
 logger =logging.getLogger(__name__)
@@ -72,14 +73,12 @@ class LeadDetailView( LoginRequiredMixin, generic.DetailView):
 
     def get_queryset(self):
         user = self.request.user
-
         # initial queryset of leads for the entire organization
         if user.is_organizer:
             queryset = Lead.objects.filter(organization=user.userprofile)
         else:
             queryset = Lead.objects.filter(organization=user.agent.organization)
             # filter for the agent that is logged in
-
             queryset = queryset.filter(agent__user=user)
         return queryset
 
@@ -220,6 +219,46 @@ class CategoryDetailView(LoginRequiredMixin, generic.DetailView):
             queryset = Category.objects.filter(organization=user.userprofile)
         else:
             queryset = Lead.objects.filter(organization=user.agent.organization)
+        return queryset
+    
+    
+class CategoryUpdateView(OrganizerAndLoginRequiredMixin, generic.UpdateView):
+    template_name = "leads/category_update.html"
+    form_class = CategoryModelForm
+
+    def get_success_url(self):
+        return reverse("leads:category-list")
+
+    def get_queryset(self):
+        user = self.request.user
+        # initial queryset of leads for the entire organisation
+        if user.is_organizer:
+            queryset = Category.objects.filter(
+                organization=user.userprofile
+            )
+        else:
+            queryset = Category.objects.filter(
+                organization=user.agent.organization
+            )
+        return queryset
+    
+class CategoryDeleteView(OrganizerAndLoginRequiredMixin, generic.DeleteView):
+    template_name = "leads/category_delete.html"
+
+    def get_success_url(self):
+        return reverse("leads:category-list")
+
+    def get_queryset(self):
+        user = self.request.user
+        # initial queryset of leads for the entire organisation
+        if user.is_organizer:
+            queryset = Category.objects.filter(
+                organization=user.userprofile
+            )
+        else:
+            queryset = Category.objects.filter(
+                organization=user.agent.organization
+            )
         return queryset
 
 class LeadCategoryUpdateView(LoginRequiredMixin, generic.UpdateView):
