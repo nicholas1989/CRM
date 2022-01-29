@@ -1,4 +1,5 @@
 from django import forms
+from django.core.exceptions import ValidationError
 from .models import Lead, Agent
 from django.contrib.auth.forms import UserCreationForm, UsernameField
 from django.contrib.auth import get_user_model
@@ -18,13 +19,16 @@ class LeadModelForm(forms.ModelForm):
             'agent',
             'description',
             'phone_numbers',
-            'email'
+            'email',
+            'profile_picture'
         )
+
 
 class LeadForm(forms.Form):
     first_name = forms.CharField()
     last_name = forms.CharField()
     age = forms.IntegerField(min_value=0)
+    phone_numbers = forms.CharField()
 
 class CustomUserCreationForm(UserCreationForm):
     class Meta:

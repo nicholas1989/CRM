@@ -1,11 +1,21 @@
+import logging
 from django.core.mail import send_mail
+from django.contrib import messages
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.views import generic
 from agents.mixins import OrganizerAndLoginRequiredMixin
 from .models import Lead, Category
-from .forms import LeadForm, LeadModelForm, CustomUserCreationForm, AssignAgentForm,  LeadCategoryUpdateForm
+from .forms import (
+                        LeadForm, 
+                        LeadModelForm, 
+                        CustomUserCreationForm, 
+                        AssignAgentForm,  
+                        LeadCategoryUpdateForm
+                    )
+
+logger =logging.getLogger(__name__)
 
 # Create your views here.
 class SignupView(generic.CreateView):
@@ -34,6 +44,7 @@ class LeadListView( LoginRequiredMixin, generic.ListView):
             queryset = Lead.objects.filter(organization=user.agent.organization, agent__isnull=False)
             # filter for the agent that is logged in
             queryset = queryset.filter(agent__user=user)
+        logger.warning("This is a test warning")
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -98,6 +109,7 @@ class LeadCreateView(OrganizerAndLoginRequiredMixin, generic.CreateView):
             from_email="nwokoronkem@gmail.com",
             recipient_list=["nnkemakolam@interranetworks.com"]
         )
+        messages.success(self.request, "You have successfully created a lead")
         return super(LeadCreateView, self).form_valid(form)
 
 #def lead_create(request):
@@ -228,6 +240,17 @@ class LeadCategoryUpdateView(LoginRequiredMixin, generic.UpdateView):
 
     def get_success_url(self):
         return reverse("leads:lead-detail", kwargs={"pk": self.get_object().id})
+    
+    
+class LeadJsonView(generic.View):
+    def get(self, request, *args, **kwargs):
+        qs = list(Lead.objects.all().values("first_name", "last_name", "age"))
+        return JsonResponse({
+            "qs": qs
+        })
+        
+        
+        
 
     
 """
