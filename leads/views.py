@@ -6,14 +6,15 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, JsonResponse
 from django.views import generic
 from agents.mixins import OrganizerAndLoginRequiredMixin
-from .models import Lead, Category
+from .models import Lead, Category, FollowUp
 from .forms import (
                         LeadForm, 
                         LeadModelForm, 
                         CustomUserCreationForm, 
                         AssignAgentForm,  
                         LeadCategoryUpdateForm,
-                        CategoryModelForm
+                        CategoryModelForm,
+                        FollowupModelForm
                     )
 
 logger =logging.getLogger(__name__)
@@ -180,6 +181,19 @@ class AssignAgentView(OrganizerAndLoginRequiredMixin, generic.FormView):
         lead.agent = agent
         lead.save()
         return super(AssignAgentView, self).form_valid(form)
+    
+class CategoryCreateView(OrganizerAndLoginRequiredMixin, generic.CreateView):
+    template_name = "leads/category_create.html"
+    form_class = CategoryModelForm
+
+    def get_success_url(self):
+        return reverse("leads:category-list")
+
+    def form_valid(self, form):
+        category = form.save(commit=False)
+        category.organization = self.request.user.userprofile
+        category.save()
+        return super(CategoryCreateView, self).form_valid(form)
 
 class CategoryListView(LoginRequiredMixin, generic.ListView):
     template_name = "leads/category_list.html"
@@ -279,6 +293,28 @@ class LeadCategoryUpdateView(LoginRequiredMixin, generic.UpdateView):
 
     def get_success_url(self):
         return reverse("leads:lead-detail", kwargs={"pk": self.get_object().id})
+    
+    
+class FollowUpCreateView(LoginRequiredMixin, generic.CreateView):
+    template_name = "leads/followup_create.html"
+    form_class = FollowupModelForm
+
+    def get_success_url(self):
+        return reverse("leads:lead-detail", kwargs={"pk": self.kwargs["pk"]})
+    
+    def get_context_data(self, **kwargs):
+        context = super(FollowUpCreateView, self).get_context_data(**kwargs)
+        context.update ({
+            "lead": Lead.objects.get(pk=self.kwargs["pk"])
+        })
+        return context
+
+    def form_valid(self, form):
+        lead = Lead.objects.get(pk=self.kwargs["pk"])
+        followup = form.save(commit=False)
+        followup.lead = lead
+        followup.save()
+        return super(FollowUpCreateView, self).form_valid(form)
     
     
 class LeadJsonView(generic.View):
