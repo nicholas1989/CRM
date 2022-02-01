@@ -27,11 +27,13 @@ class SignupView(generic.CreateView):
     def get_success_url(self):
         return reverse("login")
 
+
 class LandingPageView(generic.TemplateView): 
     template_name = "landing.html"
 
 def landing_page(request):
     return render(request, "landing.html")
+
 
 class LeadListView( LoginRequiredMixin, generic.ListView):
     template_name = "leads/lead_list.html"
@@ -161,6 +163,7 @@ class LeadDeleteView(LoginRequiredMixin, generic.DeleteView):
         # initial queryset of leads for the entire organization
         return Lead.objects.filter(organization=user.userprofile)
 
+
 class AssignAgentView(OrganizerAndLoginRequiredMixin, generic.FormView):
     template_name = "leads/assign_agent.html"
     form_class =  AssignAgentForm
@@ -182,6 +185,7 @@ class AssignAgentView(OrganizerAndLoginRequiredMixin, generic.FormView):
         lead.save()
         return super(AssignAgentView, self).form_valid(form)
     
+    
 class CategoryCreateView(OrganizerAndLoginRequiredMixin, generic.CreateView):
     template_name = "leads/category_create.html"
     form_class = CategoryModelForm
@@ -194,6 +198,7 @@ class CategoryCreateView(OrganizerAndLoginRequiredMixin, generic.CreateView):
         category.organization = self.request.user.userprofile
         category.save()
         return super(CategoryCreateView, self).form_valid(form)
+
 
 class CategoryListView(LoginRequiredMixin, generic.ListView):
     template_name = "leads/category_list.html"
@@ -221,6 +226,7 @@ class CategoryListView(LoginRequiredMixin, generic.ListView):
         else:
             queryset = Lead.objects.filter(organization=user.agent.organization)
         return queryset
+
 
 class CategoryDetailView(LoginRequiredMixin, generic.DetailView):
     template_name = "leads/category_detail.html"
@@ -256,6 +262,7 @@ class CategoryUpdateView(OrganizerAndLoginRequiredMixin, generic.UpdateView):
             )
         return queryset
     
+    
 class CategoryDeleteView(OrganizerAndLoginRequiredMixin, generic.DeleteView):
     template_name = "leads/category_delete.html"
 
@@ -274,6 +281,7 @@ class CategoryDeleteView(OrganizerAndLoginRequiredMixin, generic.DeleteView):
                 organization=user.agent.organization
             )
         return queryset
+    
 
 class LeadCategoryUpdateView(LoginRequiredMixin, generic.UpdateView):
     template_name = "leads/lead_category_update.html"
@@ -315,6 +323,46 @@ class FollowUpCreateView(LoginRequiredMixin, generic.CreateView):
         followup.lead = lead
         followup.save()
         return super(FollowUpCreateView, self).form_valid(form)
+    
+    
+class FollowUpUpdateView(LoginRequiredMixin, generic.UpdateView):
+    template_name = "leads/followup_update.html"
+    form_class =  FollowupModelForm
+
+    def get_queryset(self):
+        user = self.request.user
+        # initial queryset of leads for the entire organization
+        if user.is_organizer:
+            queryset = FollowUp.objects.filter(lead__organization=user.userprofile)
+        else:
+            queryset = FollowUp.objects.filter(lead__organization=user.agent.organization)
+            # filter for the agent that is logged in
+
+            queryset = queryset.filter(lead__agent__user=user)
+        return queryset
+
+    def get_success_url(self):
+        return reverse("leads:lead-detail", kwargs={"pk": self.get_object().lead.id})
+    
+    
+class FollowupDeleteView(OrganizerAndLoginRequiredMixin, generic.DeleteView):
+    template_name = "leads/followup_delete.html"
+
+    def get_success_url(self):
+        followup = FollowUp.objects.get(id=self.kwargs["pk"])
+        return reverse("leads:lead-detail", kwargs={"pk":followup.lead.pk})
+
+    def get_queryset(self):
+        user = self.request.user
+        # initial queryset of leads for the entire organization
+        if user.is_organizer:
+            queryset = FollowUp.objects.filter(lead__organization=user.userprofile)
+        else:
+            queryset = FollowUp.objects.filter(lead__organization=user.agent.organization)
+            # filter for the agent that is logged in
+
+            queryset = queryset.filter(lead__agent__user=user)
+        return queryset
     
     
 class LeadJsonView(generic.View):

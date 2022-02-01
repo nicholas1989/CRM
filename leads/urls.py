@@ -13,6 +13,8 @@ from .views import (
     CategoryDeleteView,
     LeadCategoryUpdateView,
     FollowUpCreateView,
+    FollowUpUpdateView,
+    FollowupDeleteView,
     LeadJsonView
 )
 
@@ -33,6 +35,8 @@ urlpatterns =[
     path('categories/<int:pk>/update/', CategoryUpdateView.as_view(), name='category-update'),
     path('categories/<int:pk>/delete/', CategoryDeleteView.as_view(), name='category-delete'),
     path('<int:pk>/followups/create/', FollowUpCreateView.as_view(), name='lead-followup-create'),
+    path('followups/<int:pk>/', FollowUpUpdateView.as_view(), name='lead-followup-update'),
+    path('followups/<int:pk>/delete', FollowupDeleteView.as_view(), name='lead-followup-delete'),
     
 ]                                                                         
  
