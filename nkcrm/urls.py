@@ -25,7 +25,7 @@ from django.contrib.auth.views import (
     PasswordResetConfirmView,
     PasswordResetCompleteView
 )
-from leads.views import landing_page, LandingPageView, SignupView
+from leads.views import landing_page, LandingPageView, SignupView, DashboardView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -36,6 +36,7 @@ urlpatterns = [
     path('password-reset-confirm/<uidb64>/<token>/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('password-reset-complete/',  PasswordResetCompleteView.as_view(), name='password_reset_complete'),
     path('', LandingPageView.as_view(), name='landing-page'),
+    path('dashboard/', DashboardView.as_view(), name='dashboard'),
     path('leads/', include('leads.urls', namespace="leads")),
     path('agents/', include('agents.urls', namespace="agents")),
     path('login/', LoginView.as_view(), name='login'),
